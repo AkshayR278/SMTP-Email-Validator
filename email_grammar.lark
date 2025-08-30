@@ -1,0 +1,28 @@
+// Start symbol
+start: email
+
+// Entire email format: local-part@domain
+email: local_part "@" domain
+
+// Local part can be dot-separated atoms or a quoted string
+local_part: dot_atom | quoted_string
+
+// Dot-atom consists of one or more atoms separated by dots
+dot_atom: atom ("." atom)*
+
+atom: /[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~\-]+/
+
+// Quoted string enclosed in double quotes, allows escaped quotes or backslash
+quoted_string: ESCAPED_STRING
+
+// Domain consists of labels separated by dots
+domain: label ("." label)+
+
+// Domain label rules (simplified)
+label: /[a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])?/
+
+// Lark builtin for quoted strings
+%import common.ESCAPED_STRING
+
+// Ignore whitespace (spaces and tabs)
+%ignore " "
