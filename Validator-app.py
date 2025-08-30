@@ -1,7 +1,8 @@
 import streamlit as st
 from validator import validate_email_address
 
-st.title("Email Validator")
+st.set_page_config(page_title="Email Client Demo", page_icon="📧")
+st.header("Email Validator")
 
 email = st.text_input("Enter an email address:")
 
