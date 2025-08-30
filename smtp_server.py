@@ -1,9 +1,8 @@
-import asyncio
 from aiosmtpd.controller import Controller
-from aiosmtpd.handlers import AsyncMessage
+from aiosmtpd.handlers import Message
 from validator import validate_email_address
 
-class EmailValidationHandler(AsyncMessage):
+class EmailValidationHandler(Message):
     async def handle_MAIL(self, server, session, envelope, address, mail_options):
         if not validate_email_address(address):
             return '550 5.1.3 Bad sender address syntax'
@@ -16,10 +15,15 @@ class EmailValidationHandler(AsyncMessage):
         envelope.rcpt_tos.append(address)
         return '250 OK'
 
+    async def handle_message(self, message):
+        # Mandatory implementation of abstract method; can leave empty
+        pass
+
 if __name__ == "__main__":
     controller = Controller(EmailValidationHandler(), hostname='127.0.0.1', port=8025)
     controller.start()
     print("SMTP server running on port 8025")
+    import asyncio
     try:
         asyncio.get_event_loop().run_forever()
     except KeyboardInterrupt:
