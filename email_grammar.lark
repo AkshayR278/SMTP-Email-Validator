@@ -1,4 +1,5 @@
-// Start symbol
+//lark done
+// Start symbol 
 start: email
 
 // Entire email format: local-part@domain
