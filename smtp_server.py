@@ -1,6 +1,12 @@
+import asyncio
+import logging
 from aiosmtpd.controller import Controller
 from aiosmtpd.handlers import Message
 from validator import validate_email_address
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+logger = logging.getLogger(__name__)
+
 
 class EmailValidationHandler(Message):
     async def handle_MAIL(self, server, session, envelope, address, mail_options):
@@ -15,16 +21,27 @@ class EmailValidationHandler(Message):
         envelope.rcpt_tos.append(address)
         return '250 OK'
 
-    async def handle_message(self, message):
-        # Mandatory implementation of abstract method; can leave empty
+    async def handle_DATA(self, server, session, envelope):
+        logger.info("Received message from %s to %s", envelope.mail_from, envelope.rcpt_tos)
+        return '250 Message accepted for delivery'
+
+
+async def run_server(hostname: str = '127.0.0.1', port: int = 8025) -> None:
+    controller = Controller(EmailValidationHandler(), hostname=hostname, port=port)
+    controller.start()
+    logger.info("SMTP validation server is running at %s:%s", hostname, port)
+
+    try:
+        await asyncio.Event().wait()
+    except asyncio.CancelledError:
         pass
+    finally:
+        controller.stop()
+        logger.info("SMTP validation server stopped")
+
 
 if __name__ == "__main__":
-    controller = Controller(EmailValidationHandler(), hostname='127.0.0.1', port=8025)
-    controller.start()
-    print("SMTP server running on port 8025")
-    import asyncio
     try:
-        asyncio.get_event_loop().run_forever()
+        asyncio.run(run_server())
     except KeyboardInterrupt:
-        controller.stop()
+        logger.info("Shutdown requested by user")

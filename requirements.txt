@@ -1,0 +1,7 @@
+lark-parser
+dnspython
+Flask
+streamlit
+aiosmtpd
+requests
+pytest
